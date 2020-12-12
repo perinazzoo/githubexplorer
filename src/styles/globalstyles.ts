@@ -11,12 +11,16 @@ export default createGlobalStyle`
   }
 
   body {
-    background: #F2F2FA url(${github}) no-repeat 65% top;
+    background: #F2F2FA url(${github}) no-repeat 75% top;
     -webkit-font-smoothing: antialiased;
   }
 
-  body, input, button {
+  html, body, #root {
     font-size: 62.5%;
+    min-height: 100vh;
+  }
+
+  body, input, button {
     font-family: 'Roboto', sans-serif;
   }
 
