@@ -2,90 +2,67 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { FiChevronRight } from 'react-icons/fi';
 
+import api from '../../services/api';
+
 import logoimage from '../../assets/logo_img.svg';
 
 import * as S from './styles';
 
+interface Repository {
+  id: number;
+  full_name: string;
+  description: string;
+  owner: {
+    login: string;
+    avatar_url: string;
+  };
+}
+
 const Home: React.FC = () => {
+  const searchRef = React.useRef(null);
+  const [repositories, setRepositories] = React.useState<Repository[]>([]);
+
+  async function handleAddRepository(e: React.FormEvent): Promise<void> {
+    try {
+      e.preventDefault();
+
+      const inputValue = searchRef.current.value;
+
+      const response = await api.get<Repository>(`/repos/${inputValue}`);
+
+      console.log([response?.data, ...repositories]);
+
+      setRepositories([response?.data, ...repositories]);
+    } catch (err) {
+      //
+    }
+  }
+
   return (
     <>
       <img src={logoimage} alt="Github Explorer" />
       <S.Title>Explore repositórios no Github.</S.Title>
-      <S.Form>
-        <input type="text" placeholder="Busque repositórios" />
+      <S.Form onSubmit={handleAddRepository}>
+        <input ref={searchRef} type="text" placeholder="Busque repositórios" />
         <button type="submit">Pesquisar</button>
       </S.Form>
 
       <S.Repositories>
-        <Link to="/">
-          <img
-            src="https://avatars0.githubusercontent.com/u/53301430?s=460&u=ce2549ed21fd0970ca1ed2349a1326be116533d9&v=4"
-            alt="Gabriel Perinazzo"
-          />
+        {repositories?.map(repository => (
+          <Link to="/" key={repository?.id}>
+            <img
+              src={repository?.owner?.avatar_url}
+              alt={repository?.owner?.login}
+            />
 
-          <div>
-            <strong>perinazzoo/perinazzoo</strong>
-            <p>Descrição repo</p>
-          </div>
+            <div>
+              <strong>{repository?.full_name}</strong>
+              <p>{repository?.description}</p>
+            </div>
 
-          <FiChevronRight size={28} color="#C9C9D4" />
-        </Link>
-
-        <Link to="/">
-          <img
-            src="https://avatars0.githubusercontent.com/u/53301430?s=460&u=ce2549ed21fd0970ca1ed2349a1326be116533d9&v=4"
-            alt="Gabriel Perinazzo"
-          />
-
-          <div>
-            <strong>perinazzoo/perinazzoo</strong>
-            <p>Descrição repo</p>
-          </div>
-
-          <FiChevronRight size={28} color="#C9C9D4" />
-        </Link>
-
-        <Link to="/">
-          <img
-            src="https://avatars0.githubusercontent.com/u/53301430?s=460&u=ce2549ed21fd0970ca1ed2349a1326be116533d9&v=4"
-            alt="Gabriel Perinazzo"
-          />
-
-          <div>
-            <strong>perinazzoo/perinazzoo</strong>
-            <p>Descrição repo</p>
-          </div>
-
-          <FiChevronRight size={28} color="#C9C9D4" />
-        </Link>
-
-        <Link to="/">
-          <img
-            src="https://avatars0.githubusercontent.com/u/53301430?s=460&u=ce2549ed21fd0970ca1ed2349a1326be116533d9&v=4"
-            alt="Gabriel Perinazzo"
-          />
-
-          <div>
-            <strong>perinazzoo/perinazzoo</strong>
-            <p>Descrição repo</p>
-          </div>
-
-          <FiChevronRight size={28} color="#C9C9D4" />
-        </Link>
-
-        <Link to="/">
-          <img
-            src="https://avatars0.githubusercontent.com/u/53301430?s=460&u=ce2549ed21fd0970ca1ed2349a1326be116533d9&v=4"
-            alt="Gabriel Perinazzo"
-          />
-
-          <div>
-            <strong>perinazzoo/perinazzoo</strong>
-            <p>Descrição repo</p>
-          </div>
-
-          <FiChevronRight size={28} color="#C9C9D4" />
-        </Link>
+            <FiChevronRight size={28} color="#C9C9D4" />
+          </Link>
+        ))}
       </S.Repositories>
     </>
   );

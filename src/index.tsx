@@ -11,4 +11,4 @@ ReactDOM.render(
 );
 
 // eslint-disable-next-line no-console
-reportWebVitals(console.log);
+reportWebVitals();
