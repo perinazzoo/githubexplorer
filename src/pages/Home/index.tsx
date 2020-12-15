@@ -20,7 +20,14 @@ interface Repository {
 
 const Home: React.FC = () => {
   const searchRef = React.useRef(null);
-  const [repositories, setRepositories] = React.useState<Repository[]>([]);
+  const [inputError, setInputError] = React.useState('');
+  const [repositories, setRepositories] = React.useState<Repository[]>(
+    JSON.parse(localStorage.getItem('@githubexplorer')) || [],
+  );
+
+  React.useEffect(() => {
+    localStorage.setItem('@githubexplorer', JSON.stringify(repositories));
+  }, [repositories]);
 
   async function handleAddRepository(e: React.FormEvent): Promise<void> {
     try {
@@ -28,13 +35,31 @@ const Home: React.FC = () => {
 
       const inputValue = searchRef.current.value;
 
+      const repoExists = repositories.some(
+        repository =>
+          repository?.full_name?.toLowerCase() === inputValue?.toLowerCase(),
+      );
+
+      if (repoExists) {
+        setInputError('Repositório já está listado.');
+        return;
+      }
+
+      if (!inputValue) {
+        setInputError('Digite o autor/nome do repositório.');
+        return;
+      }
+
       const response = await api.get<Repository>(`/repos/${inputValue}`);
 
-      console.log([response?.data, ...repositories]);
-
       setRepositories([response?.data, ...repositories]);
+
+      searchRef.current.value = '';
+      setInputError('');
     } catch (err) {
-      //
+      setInputError(
+        'Erro ao buscar o repositório, possívelmente ele não existe.',
+      );
     }
   }
 
@@ -42,10 +67,12 @@ const Home: React.FC = () => {
     <>
       <img src={logoimage} alt="Github Explorer" />
       <S.Title>Explore repositórios no Github.</S.Title>
-      <S.Form onSubmit={handleAddRepository}>
+      <S.Form hasError={!!inputError} onSubmit={handleAddRepository}>
         <input ref={searchRef} type="text" placeholder="Busque repositórios" />
         <button type="submit">Pesquisar</button>
       </S.Form>
+
+      <S.Error>{inputError}</S.Error>
 
       <S.Repositories>
         {repositories?.map(repository => (
