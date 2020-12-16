@@ -4,7 +4,7 @@ import { FiChevronRight } from 'react-icons/fi';
 
 import api from '../../services/api';
 
-import logoimage from '../../assets/logo_img.svg';
+import logoImage from '../../assets/logo_img.svg';
 
 import * as S from './styles';
 
@@ -65,7 +65,7 @@ const Home: React.FC = () => {
 
   return (
     <>
-      <img src={logoimage} alt="Github Explorer" />
+      <img src={logoImage} alt="Github Explorer" />
       <S.Title>Explore repositórios no Github.</S.Title>
       <S.Form hasError={!!inputError} onSubmit={handleAddRepository}>
         <input ref={searchRef} type="text" placeholder="Busque repositórios" />
@@ -76,7 +76,10 @@ const Home: React.FC = () => {
 
       <S.Repositories>
         {repositories?.map(repository => (
-          <Link to="/" key={repository?.id}>
+          <Link
+            to={`/repository/${repository?.full_name}`}
+            key={repository?.id}
+          >
             <img
               src={repository?.owner?.avatar_url}
               alt={repository?.owner?.login}

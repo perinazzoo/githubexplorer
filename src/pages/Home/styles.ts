@@ -56,7 +56,7 @@ export const Repositories = styled.div`
   a {
     width: 100%;
     display: flex;
-    padding: 16px;
+    padding: 16px 24px;
     background-color: #fff;
     border-radius: 5px;
     text-decoration: none;
