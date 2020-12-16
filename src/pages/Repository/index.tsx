@@ -1,6 +1,8 @@
 import React from 'react';
 import { Link, useRouteMatch } from 'react-router-dom';
-import { FiChevronLeft } from 'react-icons/fi';
+import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+
+import api from '../../services/api';
 
 import logoImage from '../../assets/logo_img.svg';
 
@@ -10,8 +12,42 @@ interface RepositoryParam {
   repository: string;
 }
 
+interface Issue {
+  id: number;
+  html_url: string;
+  title: string;
+  user: {
+    login: string;
+  };
+}
+
+interface Info {
+  description: string;
+  forks_count: number;
+  stargazers_count: number;
+  open_issues_count: number;
+  owner: {
+    login: string;
+    avatar_url: string;
+  };
+}
+
 const Repository: React.FC = () => {
   const { params } = useRouteMatch<RepositoryParam>();
+  const [issues, setIssues] = React.useState<Issue[]>([]);
+  const [info, setInfo] = React.useState<Info>(null);
+
+  React.useEffect(() => {
+    (async () => {
+      const [responseInfo, responseIssues] = await Promise.all([
+        api.get<Info>(`/repos/${params.repository}`),
+        api.get<Issue[]>(`/repos/${params.repository}/issues`),
+      ]);
+
+      setIssues(responseIssues?.data);
+      setInfo(responseInfo?.data);
+    })();
+  }, [params.repository]);
 
   return (
     <>
@@ -23,42 +59,53 @@ const Repository: React.FC = () => {
         </Link>
       </S.Header>
 
-      <S.RepositoryInfo>
-        <header>
-          <img
-            src="https://avatars2.githubusercontent.com/u/2254731?s=400&u=0ba16a79456c2f250e7579cb388fa18c5c2d7d65&v=4"
-            alt="Nome"
-            width="120"
-            height="120"
-          />
-          <div>
-            <h1>{params?.repository}</h1>
-            <p>descricao teste</p>
-          </div>
-        </header>
-        <ul>
-          <li>
-            <strong>1080</strong>
-            <span>Stars</span>
-          </li>
-          <li>
-            <strong>1080</strong>
-            <span>Forks</span>
-          </li>
-          <li>
-            <strong>1080</strong>
-            <span>Issues abertas</span>
-          </li>
-        </ul>
-      </S.RepositoryInfo>
+      {info && (
+        <S.RepositoryInfo>
+          <header>
+            <img
+              src={info.owner.avatar_url}
+              alt={info.owner.login}
+              width="120"
+              height="120"
+            />
+            <div>
+              <h1>{params.repository}</h1>
+              <p>{info.description}</p>
+            </div>
+          </header>
+          <ul>
+            <li>
+              <strong>{info.stargazers_count}</strong>
+              <span>Stars</span>
+            </li>
+            <li>
+              <strong>{info.forks_count}</strong>
+              <span>Forks</span>
+            </li>
+            <li>
+              <strong>{info.open_issues_count}</strong>
+              <span>Issues abertas</span>
+            </li>
+          </ul>
+        </S.RepositoryInfo>
+      )}
 
       <S.Issues>
-        <Link to="/">
-          <div className="">
-            <strong>asdopkqwdpo</strong>
-            <p>asdopkqwdpo</p>
-          </div>
-        </Link>
+        {issues.map(issue => (
+          <a
+            key={issue?.id}
+            href={issue?.html_url}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <div className="">
+              <strong>{issue?.title}</strong>
+              <p>{issue?.user?.login}</p>
+            </div>
+
+            <FiChevronRight size={28} color="#C9C9D4" />
+          </a>
+        ))}
       </S.Issues>
     </>
   );
